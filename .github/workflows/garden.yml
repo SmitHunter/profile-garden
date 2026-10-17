@@ -1,0 +1,100 @@
+name: garden
+
+# Renders the garden (and, if readme.enabled, the README images) every day and
+# commits them to the profile repo named in garden.config.json.
+#
+# Needs one secret, PROFILE_TOKEN: a fine-grained personal access token with
+# Repository access = only your profile repo, and Permissions > Contents = Read and write.
+# It is used to read your contribution calendar (including private contributions,
+# if your profile shows them) and to push to the profile repo.
+
+on:
+  schedule:
+    - cron: "0 18 * * *" # once a day; GitHub may start it a little late
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: garden
+  cancel-in-progress: false
+
+jobs:
+  garden:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Test
+        run: npm test
+
+      - name: Read config
+        id: cfg
+        # config.mjs validates garden.config.json; a bad config stops the run here
+        run: |
+          {
+            echo "profile_repo=$(node src/config.mjs --get profileRepo)"
+            echo "output_dir=$(node src/config.mjs --get outputDir)"
+            echo "images_dir=$(node src/config.mjs --get readme.imagesDir)"
+            echo "readme=$(node src/config.mjs --get readme.enabled)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Generate gardens
+        run: node src/main.mjs --out out
+        env:
+          GH_TOKEN: ${{ secrets.PROFILE_TOKEN }}
+
+      - name: Generate README images
+        if: steps.cfg.outputs.readme == 'true'
+        run: node src/readme/build.mjs --out out/readme
+        env:
+          GH_TOKEN: ${{ secrets.PROFILE_TOKEN }}
+
+      # everything is rendered before the profile repo is touched, so a failed
+      # fetch or render never leaves half-updated images behind
+      - name: Check out profile repo
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ steps.cfg.outputs.profile_repo }}
+          token: ${{ secrets.PROFILE_TOKEN }}
+          path: profile
+
+      - name: Update profile repo files
+        env:
+          OUT_DIR: ${{ steps.cfg.outputs.output_dir }}
+          IMAGES_DIR: ${{ steps.cfg.outputs.images_dir }}
+          README_IMAGES: ${{ steps.cfg.outputs.readme }}
+        run: |
+          mkdir -p "profile/$OUT_DIR"
+          cp out/*.svg "profile/$OUT_DIR/"
+          if [ "$README_IMAGES" = "true" ]; then
+            mkdir -p "profile/$IMAGES_DIR"
+            # splice the seed-packet section into the README (if it has the markers)
+            # and drop packet SVGs that are no longer pinned
+            node src/readme/splice.mjs --readme profile/README.md --html out/readme/packets.html --prune "profile/$IMAGES_DIR" --keep out/readme
+            cp out/readme/*.svg "profile/$IMAGES_DIR/"
+          fi
+
+      - name: Commit and push
+        working-directory: profile
+        env:
+          OUT_DIR: ${{ steps.cfg.outputs.output_dir }}
+          IMAGES_DIR: ${{ steps.cfg.outputs.images_dir }}
+          README_IMAGES: ${{ steps.cfg.outputs.readme }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A "$OUT_DIR"
+          if [ "$README_IMAGES" = "true" ]; then
+            git add -A "$IMAGES_DIR"
+            if [ -f README.md ]; then git add README.md; fi
+          fi
+          git diff --cached --quiet || git commit -m "Update profile garden"
+          git pull --rebase
+          git push

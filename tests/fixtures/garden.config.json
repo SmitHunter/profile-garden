@@ -1,0 +1,14 @@
+{
+  "login": "octocat",
+  "timezone": "Pacific/Auckland",
+  "hemisphere": "south",
+  "readme": {
+    "banner": { "name": "Your Name", "title": "Software Engineer · Somewhere", "tagline": "tools · games · tiny APIs" },
+    "stack": ["Python", "TypeScript", "Rust", "Postgres", "Docker"],
+    "footer": { "left": "Thanks for visiting!", "right": "octocat.dev" },
+    "packets": {
+      "exclude": ["chess-engine"],
+      "overrides": { "todo-api": { "line": "Todo lists over plain HTTP", "tags": ["TypeScript", "Express"], "art": "filmstrip" } }
+    }
+  }
+}

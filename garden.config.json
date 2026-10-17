@@ -1,0 +1,32 @@
+{
+  "login": "SmitHunter",
+  "profileRepo": "SmitHunter/SmitHunter",
+  "signName": "SMITHUNTER'S PLOT",
+  "timezone": "Australia/Melbourne",
+  "hemisphere": "south",
+  "outputDir": "profile-garden",
+  "readme": {
+    "enabled": true,
+    "imagesDir": "readme",
+    "banner": {
+      "name": "Hunter Smith",
+      "title": "AI Engineer · Melbourne, Australia",
+      "tagline": "AI tools · automation · business operations"
+    },
+    "stack": ["Python", "TypeScript", "JavaScript", "Claude API", "MCP", "Next.js", "Astro", "Flask", "Godot", "Cloudflare Workers", "Supabase"],
+    "footer": {
+      "left": "LinkedIn → hunter-sm",
+      "right": "Melbourne, AU"
+    },
+    "packets": {
+      "exclude": ["SmitHunter", "achievements-sandbox"],
+      "overrides": {
+        "HookLine": {
+          "line": "AI turns long videos into short clips",
+          "tags": ["Python", "Whisper", "Claude"],
+          "art": "filmstrip"
+        }
+      }
+    }
+  }
+}

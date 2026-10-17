@@ -1,0 +1,18 @@
+{
+  "name": "profile-garden",
+  "version": "1.0.0",
+  "description": "An animated contribution garden for your GitHub profile README: one plant per day, rendered as SVG by a daily GitHub Action.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "render": "node src/main.mjs",
+    "check-total": "node src/main.mjs --check-total",
+    "preview": "node scripts/preview.mjs",
+    "make-fixture": "node scripts/make-fixture.mjs"
+  }
+}

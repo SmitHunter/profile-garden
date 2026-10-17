@@ -1,0 +1,8 @@
+[
+  { "name": "weather-bot", "description": "Posts the morning forecast to chat", "url": "https://github.com/octocat/weather-bot", "isPrivate": false, "isFork": false, "languages": { "nodes": [{ "name": "Python" }] } },
+  { "name": "octocat", "description": "My profile README", "url": "https://github.com/octocat/octocat", "isPrivate": false, "isFork": false, "languages": { "nodes": [] } },
+  { "name": "todo-api", "description": "A small REST API for todo lists", "url": "https://github.com/octocat/todo-api", "isPrivate": false, "isFork": false, "languages": { "nodes": [{ "name": "TypeScript" }, { "name": "JavaScript" }] } },
+  { "name": "secret-plans", "description": "Not for the README", "url": "https://github.com/octocat/secret-plans", "isPrivate": true, "isFork": false, "languages": { "nodes": [{ "name": "Go" }] } },
+  { "name": "pixel-pets", "description": "Tiny browser pets that live in a tab", "url": "https://github.com/octocat/pixel-pets", "isPrivate": false, "isFork": false, "languages": { "nodes": [{ "name": "JavaScript" }] } },
+  { "name": "chess-engine", "description": "A bitboard chess engine", "url": "https://github.com/octocat/chess-engine", "isPrivate": false, "isFork": false, "languages": { "nodes": [{ "name": "Rust" }] } }
+]
