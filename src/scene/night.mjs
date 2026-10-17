@@ -1,9 +1,9 @@
 // Night layer.
 // Drawn after the sorted day items: overlay first, then lights and life,
 // then the plaque + glow markup again so they sit above the overlay.
-import { iso, poly, line, E, Ci, L, MONO } from './draw.mjs';
+import { iso, poly, line, E, Ci, L } from './draw.mjs';
 import { rng } from '../rng.mjs';
-import { BED, bedOrigin, spot, bedSignAt, plaqueBoard, plaqueLantern } from './props.mjs';
+import { BED, bedOrigin, spot, plaqueBoard, plaqueLantern } from './props.mjs';
 
 const f1 = v => v.toFixed(1);
 const pad = n => String(n).padStart(2, '0');
@@ -21,31 +21,21 @@ function festoon(from, to, n) {
   return o;
 }
 
-// gold star + number above each 100th-contribution day's plant. A label that
-// would collide with the rosette, a month sign or an earlier label is lifted clear.
-function milestones(stats, win, rosetteBox) {
+// gold star above each 100th-contribution day's plant
+function milestones(stats, win) {
   let o = '', idx = 0;
-  const boxes = win.months.map((_, m) => { const [sa, sb] = bedSignAt(m); return [sa - 22, sb - 37, sa + 22, sb - 13]; });
-  const hit = (b) => boxes.some(q => b[0] < q[2] + 3 && q[0] < b[2] + 3 && b[1] < q[3] + 2 && q[1] < b[3] + 2);
-  const days = [];
   win.months.forEach(({ year, month, days: n }, m) => {
     const { bx, by } = bedOrigin(m);
-    for (let i = 0; i < n; i++, idx++) days.push({ date: `${year}-${pad(month)}-${pad(i + 1)}`, i, idx, ...spot(bx, by, i) });
+    for (let i = 0; i < n; i++, idx++) {
+      if (!stats.milestones[`${year}-${pad(month)}-${pad(i + 1)}`]) continue;
+      const { cx, cy } = spot(bx, by, i), [px, py] = iso(cx, cy, BED.Z);
+      o += `<g class="gr mg" style="animation-delay:${idx*28}ms"><g class="ms" style="animation-duration:2.2s;animation-delay:${f1(-(i % 5) * 0.4)}s"><circle cx="${f1(px)}" cy="${f1(py-14)}" r="9" fill="#ffd84a" opacity=".25"/><path d="M${f1(px)} ${f1(py-24)} l2 8 l8 2 l-8 2 l-2 8 l-2 -8 l-8 -2 l8 -2 z" fill="#ffe680"/></g></g>`;
+    }
   });
-  if (rosetteBox) boxes.push(rosetteBox);
-  for (const { date, i, idx, cx, cy } of days) {
-    const v = stats.milestones[date];
-    if (!v) continue;
-    const [px, py] = iso(cx, cy, BED.Z), hw = String(v).length * 18.5 * 0.3 + 2;
-    let ly = py - 29;
-    for (let k = 0; k < 8 && hit([px - hw, ly - 15, px + hw, ly + 3]); k++) ly -= 18;
-    boxes.push([px - hw, ly - 15, px + hw, ly + 3]);
-    o += `<g class="gr mg" style="animation-delay:${idx*28}ms"><g class="ms" style="animation-duration:2.2s;animation-delay:${f1(-(i % 5) * 0.4)}s"><circle cx="${f1(px)}" cy="${f1(py-14)}" r="9" fill="#ffd84a" opacity=".25"/><path d="M${f1(px)} ${f1(py-24)} l2 8 l8 2 l-8 2 l-2 8 l-2 -8 l-8 -2 l8 -2 z" fill="#ffe680"/></g></g><text x="${f1(px)}" y="${f1(ly)}" font-size="18.5" font-weight="700" text-anchor="middle" font-family="${MONO}" fill="#ffe27a" stroke="#2a1a08" stroke-width="4" stroke-linejoin="round" paint-order="stroke">${v}</text>`;
-  }
   return o;
 }
 
-export function nightLayer({ stats, win, glow, plaque, rosetteBox }) {
+export function nightLayer({ stats, win, glow, plaque }) {
   const r = rng(505);
   let N = NIGHT_DEFS;
   // darken everything to night, matching GitHub's dark background
@@ -80,7 +70,7 @@ export function nightLayer({ stats, win, glow, plaque, rosetteBox }) {
     N += `<g class="ff" style="animation-name:blink,bob${k};animation-duration:${f1(t)}s,${f1(t*1.7)}s;animation-delay:${f1(o)}s">` + Ci(a, b, 7, 'url(#gFly)') + Ci(a, b, 1.3, '#f8ffc0') + '</g>';
   }
   // sign lit by its lantern, readable; then everything else that glows
-  N += plaque + milestones(stats, win, rosetteBox) + glow.join('');
+  N += plaque + milestones(stats, win) + glow.join('');
   // shooting star + fox eyes in the lavender
   N += `<g class="shoot"><path d="M880 70 L940 42 L941 44.5 Z" fill="url(#gShoot)"/><circle cx="880" cy="70" r="1.8" fill="#fff"/></g>`;
   { const [a,b] = iso(-4.0, 14.9, 0.35); N += `<g class="eyes">` + Ci(a-3, b, 1.4, '#ffd23f') + Ci(a+3, b, 1.4, '#ffd23f') + Ci(a-3, b, 4, '#ffd23f', 'opacity=".2"') + Ci(a+3, b, 4, '#ffd23f', 'opacity=".2"') + '</g>'; }

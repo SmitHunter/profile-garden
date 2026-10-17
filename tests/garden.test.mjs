@@ -125,10 +125,6 @@ test('milestones at night', () => {
   const n = Object.keys(stats.milestones).length;
   assert.ok(n > 0);
   assert.equal(count(out, 'class="ms"'), n);
-  const last = out.lastIndexOf('class="ms"');
-  const label = `>${Math.max(...Object.values(stats.milestones))}</text>`;
-  assert.ok(out.indexOf(label, last) > last);
-  assert.equal(out.indexOf('class="ms"', last + 1), -1);
   const small = new Map([['2026-10-10', 40]]);
   assert.equal(count(night(small), 'class="ms"'), 0);
 });
