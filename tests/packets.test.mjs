@@ -56,6 +56,13 @@ test('every art variant renders day and night with the packet number', () => {
       assert.ok(!svg.includes('undefined') && !svg.includes('NaN'));
     }
   }
+  for (const art of ['filmSprout', 'radarSprout']) {
+    const [p] = selectPackets([repo('custom')], { overrides: { custom: { line: 'A custom packet', tags: ['Python'], art } } });
+    for (const night of [false, true]) {
+      const svg = renderPacket(p, { night });
+      assert.ok(svg.endsWith('</svg>') && !svg.includes('undefined') && !svg.includes('NaN'));
+    }
+  }
   const [bare] = selectPackets([repo('bare', { languages: { nodes: [] } })]);
   assert.deepEqual(bare.tags, []);
   assert.ok(!renderPacket(bare, { night: false }).includes('NaN'));

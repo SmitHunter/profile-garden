@@ -83,7 +83,7 @@ You need a [profile repo](https://docs.github.com/en/account-and-profile/setting
 | `readme.stack` | `[]` | Names for the plant-marker stack image. Empty: no stack image. Names over 12 characters wrap at spaces. |
 | `readme.footer.left` / `.right` | none | Signpost labels on the fence footer (max 20 each). |
 | `readme.packets.exclude` | `[]` | Pinned repos to skip. The profile repo and private repos are always skipped. |
-| `readme.packets.overrides` | `{}` | Per-repo packet content: `{ "<repo>": { "line", "tags", "title", "url", "art" } }`. `art` is one of `filmstrip`, `python`, `typescript`, `javascript`, `flower`; otherwise it is picked from the repo's main language. |
+| `readme.packets.overrides` | `{}` | Per-repo packet content: `{ "<repo>": { "line", "tags", "title", "url", "art" } }`. `art` is one of `filmstrip`, `radar`, `python`, `typescript`, `javascript`, `flower`; otherwise it is picked from the repo's main language. |
 
 Seed packets come from your pinned repos (up to 6, in pinned order). A repo needs a description or an override to get one.
 

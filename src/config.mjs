@@ -10,7 +10,7 @@ export const CONFIG_FILE = 'garden.config.json';
 // limits that keep lettering on its board (see the renderers)
 export const LIMITS = { signName: 18, bannerName: 20, bannerTitle: 42, tagline: 54, footerSign: 20, stackItem: 24 };
 
-export const ART_NAMES = { filmstrip: 'filmSprout', python: 'seedPython', typescript: 'seedTypeScript', javascript: 'seedJavaScript', flower: 'seedOther' };
+export const ART_NAMES = { filmstrip: 'filmSprout', radar: 'radarSprout', python: 'seedPython', typescript: 'seedTypeScript', javascript: 'seedJavaScript', flower: 'seedOther' };
 
 const LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
 const REPO = /^[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}$/;

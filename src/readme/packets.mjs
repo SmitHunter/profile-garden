@@ -146,6 +146,44 @@ function filmSprout(x, y, w, h) {
   return o;
 }
 
+// a sprout whose bloom is a radar dish sending out pulses, with a gig ticket for a plant marker
+function radarSprout(x, y, w, h) {
+  let o = `<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e4dcef"/><stop offset="1" stop-color="#f6eed6"/></linearGradient>`;
+  o += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#sky)"/>`;
+  o += Ci(x + 40, y + 32, 17, '#f8dc8a', 'opacity=".55"') + Ci(x + 40, y + 32, 10, '#f6cf63', 'opacity=".7"');
+  o += `<path d="M${x} ${y + h - 30} Q${x + w * 0.3} ${y + h - 48} ${x + w * 0.6} ${y + h - 36} T${x + w} ${y + h - 42} V${y + h} H${x} Z" fill="#b9d996" opacity=".75"/>`;
+  const px = x + w / 2 - 14, gy = y + h - 26, top = gy - 72;
+  o += E(px, gy + 6, 62, 15, '#6a4529') + E(px, gy + 2, 50, 9, '#7d5434');
+  for (const [dx, dy] of [[-36, 4], [-14, 9], [20, 6], [38, 3]]) o += E(px + dx, gy + dy, 2.2, 1.3, '#4a2e1a');
+  // ticket stub on a stake, planted like a seed label
+  const tx = x + 40, ty = gy - 40;
+  let tk = `<path d="M${tx + 2} ${ty + 30} L${tx + 4} ${gy + 6}" stroke="#9a6a3e" stroke-width="4" stroke-linecap="round"/>`;
+  tk += `<rect x="${tx - 24}" y="${ty}" width="54" height="30" rx="3" fill="#f2d48a" stroke="#b8862a" stroke-width="1.2"/>`;
+  tk += `<path d="M${tx + 14} ${ty + 3} V${ty + 27}" stroke="#b8862a" stroke-width="1.2" stroke-dasharray="2.5 2.5"/>`;
+  tk += `<path d="M${tx - 6} ${ty + 7} l2.6 5.3 5.8 .8 -4.2 4.1 1 5.8 -5.2 -2.7 -5.2 2.7 1 -5.8 -4.2 -4.1 5.8 -.8 Z" fill="#e8708f"/>`;
+  o += `<g transform="rotate(-10 ${tx} ${gy})">${tk}</g>`;
+  // stem, leaves and the dish (tilted up-right), with pulses rippling out of its feed
+  const tilt = 35, rad = tilt * Math.PI / 180, feed = 17;
+  let sp = `<path d="M${px} ${gy} C${px - 4} ${gy - 28} ${px + 8} ${gy - 56} ${px} ${top + 10}" stroke="#5a9a35" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+  sp += leaf(px + 1, gy - 30, 32, -58, 10, 'url(#leafA)') + leaf(px + 2, gy - 48, 28, 60, 9, 'url(#leafB)');
+  let dish = `<path d="M0 6 V13" stroke="#5a9a35" stroke-width="4" stroke-linecap="round"/>`;
+  dish += `<path d="M-23 0 A23 14 0 0 0 23 0 Z" fill="#dfe3ea" stroke="#6f7a8a" stroke-width="1.5"/>` + E(0, 0, 23, 4, '#b7c0cd');
+  dish += `<path d="M0 0 V${-feed + 3}" stroke="#6f7a8a" stroke-width="2"/>` + Ci(0, -feed, 3.6, '#e8708f');
+  sp += `<g transform="translate(${px} ${top}) rotate(${tilt})">${dish}</g>`;
+  o += `<g class="sw" style="animation-duration:5s;animation-delay:-2s">${sp}</g>`;
+  const fx = px + feed * Math.sin(rad), fy = top - feed * Math.cos(rad);
+  [16, 30, 44].forEach((r, i) => {
+    const a0 = rad - 0.75, a1 = rad + 0.75;
+    const p0 = [fx + r * Math.sin(a0), fy - r * Math.cos(a0)], p1 = [fx + r * Math.sin(a1), fy - r * Math.cos(a1)];
+    o += `<path class="tw" style="animation-delay:${f1(-i * 0.6)}s" d="M${f1(p0[0])} ${f1(p0[1])} A${r} ${r} 0 0 1 ${f1(p1[0])} ${f1(p1[1])}" stroke="#8b5cf6" stroke-width="${f1(3.2 - i * 0.6)}" fill="none" stroke-linecap="round"/>`;
+  });
+  // two notes drifting up on the right
+  for (const [nx, ny, s, d] of [[x + w - 34, y + 92, 1, 0], [x + w - 62, y + 120, 0.8, -1.4]]) {
+    o += `<g class="tw" style="animation-delay:${d}s" transform="translate(${nx} ${ny}) scale(${s})" fill="#5a3a1e" opacity=".75">${E(0, 0, 6, 4.4, '#5a3a1e', 'transform="rotate(-20)"')}<path d="M5.2 -1.5 V-26 Q12 -20 14 -12" stroke="#5a3a1e" stroke-width="2" fill="none"/></g>`;
+  }
+  return o;
+}
+
 // generic seed illustration: a seed in a soil mound sprouting a stem and a bloom.
 // Variants differ by sky, ground and bloom colour, and bloom shape.
 const SEEDS = {
@@ -177,7 +215,7 @@ function seedArt(v) {
   };
 }
 
-const ART = { filmSprout, ...Object.fromEntries(Object.entries(SEEDS).map(([k, v]) => [k, seedArt(v)])) };
+const ART = { filmSprout, radarSprout, ...Object.fromEntries(Object.entries(SEEDS).map(([k, v]) => [k, seedArt(v)])) };
 
 // paper grain + worn edges
 const PAPER_FX = `<filter id="grainF" filterUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 .36  0 0 0 0 .24  0 0 0 0 .12  0 0 0 .55 -.17"/></filter>`;
