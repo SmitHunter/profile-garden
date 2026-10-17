@@ -25,6 +25,12 @@
           "line": "AI turns long videos into short clips",
           "tags": ["Python", "Whisper", "Claude"],
           "art": "filmstrip"
+        },
+        "adscout": {
+          "title": "ADSCOUT",
+          "line": "Spots proven winning products from Meta ads",
+          "tags": ["Python", "React", "Claude"],
+          "art": "python"
         }
       }
     }
