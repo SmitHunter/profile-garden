@@ -104,19 +104,28 @@ export function plantSpot({ date, idx, cx, cy, lv, crop, prize, j }) {
   return { depth: cx + cy, svg: `<g class="gr" data-d="${date}" style="animation-delay:${idx*28}ms">${inner}</g>` };
 }
 
-// blue prize rosette beside the best day's plant; sized so the count reads at SIGN_FS
-export function rosetteGeom(cx, cy, count) {
+// approx. height of a grown plant above its base, in plant-scale units (k)
+const CROP_H = { tomato: 19, corn: 30, pumpkin: 6, carrot: 11, cabbage: 6, broccoli: 11, garlic: 16, peas: 17, lettuce: 5, beans: 21, strawberry: 4 };
+const plantTop = (crop, lv, k) => (lv <= 2 ? 4 : CROP_H[crop] * (lv === 3 ? 0.72 : 1)) * k;
+
+// blue prize rosette centred above the best day's plant, pinned to it by its ribbon tails;
+// sized so the count reads at SIGN_FS, and kept within its own bed's top-face footprint
+export function rosetteGeom(cx, cy, count, bx, by, lv, crop) {
   const [px, py] = iso(cx, cy, BED.Z), rc = Math.max(12, String(count).length * SIGN_FS * 0.3 + 4);
-  return { rc, rx: px + 14 + rc, ry: py - 10 };
+  const xmin = iso(bx, by + BED.H)[0], xmax = iso(bx + BED.W, by)[0];
+  const rx = Math.min(Math.max(px, xmin + rc - 3), xmax - rc + 3);
+  const top = py - plantTop(crop, lv, 2.7), ry = top - rc * 1.5 - 2;
+  return { rc, rx, ry, px, top, xmin, xmax, box: [rx - rc - 5, ry - rc - 5, rx + rc + 5, top] };
 }
-export function rosette({ idx, cx, cy, count }) {
-  const { rc, rx, ry } = rosetteGeom(cx, cy, count);
+export function rosette({ idx, cx, cy, count, bx, by, lv, crop }) {
+  const { rc, rx, ry, px, top, box } = rosetteGeom(cx, cy, count, bx, by, lv, crop);
   const tail = (sx) => `M${f1(rx + sx * rc * 0.45)} ${f1(ry + rc * 0.6)} l${sx * 4} ${f1(rc * 0.9)} l${-sx * 4} -3 l${-sx * 3} 4 z`;
-  const svg = `<g class="gr rz" style="animation-delay:${idx*28}ms"><path d="${tail(-1)} ${tail(1)}" fill="#2f6fd6"/>` +
+  const svg = `<g class="gr rz" style="animation-delay:${idx*28}ms">` + L(rx, ry + rc * 0.5, px, top + 1, '#2f6fd6', 2) + `<path d="${tail(-1)} ${tail(1)}" fill="#2f6fd6"/>` +
     [...Array(14)].map((_, n) => Ci(rx + Math.cos(n/14*6.28)*(rc + 1.5), ry + Math.sin(n/14*6.28)*(rc + 1.5), 3.4, '#3f82e8')).join('') +
     Ci(rx, ry, rc + 1, '#2f6fd6') + Ci(rx, ry, rc - 1.2, '#ffe08a') +
     txt(rx, ry + SIGN_FS * 0.35, SIGN_FS, count) + '</g>';
-  return { depth: cx + cy + 0.02, svg, glow: svg };
+  // depth above everything in its own bed (and its sign), so neighbours never cover it
+  return { depth: bx + by + BED.W + BED.H + 2, svg, glow: svg, box };
 }
 
 // ---------- outbuildings ----------

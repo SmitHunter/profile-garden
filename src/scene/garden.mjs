@@ -22,7 +22,7 @@ export function buildScene({ calendar, win, stats, night, signName, hemisphere =
   add(P.sunflowers());
   add(P.trees());
 
-  let idx = 0, tend = null;
+  let idx = 0, tend = null, rosetteBox = null;
   win.months.forEach(({ year, month, days }, m) => {
     const { bx, by } = P.bedOrigin(m);
     add(P.bed(m, soil));
@@ -35,7 +35,7 @@ export function buildScene({ calendar, win, stats, night, signName, hemisphere =
       const { cx, cy } = P.spot(bx, by, i);
       const prize = stats.best?.date === date;
       add(P.plantSpot({ date, idx, cx, cy, lv: level(count), crop: cropFor(month, hemisphere), prize, j: jitter() }));
-      if (prize) { const r = P.rosette({ idx, cx, cy, count }); add(r); glow.push(r.glow); }
+      if (prize) { const r = P.rosette({ idx, cx, cy, count, bx, by, lv: level(count), crop: cropFor(month, hemisphere) }); add(r); glow.push(r.glow); rosetteBox = r.box; }
       if (date === win.drawnThrough) tend = { cx, cy, by };
     }
   });
@@ -64,12 +64,12 @@ export function buildScene({ calendar, win, stats, night, signName, hemisphere =
   if (!night) { add(P.butterflies()); add(P.clouds()); }
 
   items.sort((p, q) => p.depth - q.depth);
-  return { items, glow, plaque: plaque.svg, css };
+  return { items, glow, plaque: plaque.svg, css, rosetteBox };
 }
 
 // signName: the sign's top line; hemisphere: 'south' | 'north' (picks the crop for each month)
 export function renderGarden({ calendar, win, stats, night, signName = 'MY PLOT', hemisphere = 'south' }) {
-  const { items, glow, plaque, css } = buildScene({ calendar, win, stats, night, signName, hemisphere });
-  const top = night ? nightLayer({ stats, win, glow, plaque }) : '';
+  const { items, glow, plaque, css, rosetteBox } = buildScene({ calendar, win, stats, night, signName, hemisphere });
+  const top = night ? nightLayer({ stats, win, glow, plaque, rosetteBox }) : '';
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 700" text-rendering="geometricPrecision"><style>${css}</style>${DEFS}${items.map(i => i.svg).join('')}${top}</svg>`;
 }
