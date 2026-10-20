@@ -20,7 +20,8 @@ const win = planWindow(new Date('2026-10-16T18:00:00Z'), config.timezone);
 async function allSvgs() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'legible-'));
   await build({ config, outDir: dir, fixture: 'tests/fixtures/calendar-2026-10-17.json', pinnedFixture: 'tests/fixtures/pinned.json' });
-  const out = fs.readdirSync(dir).filter(f => f.endsWith('.svg')).map(f => [f, fs.readFileSync(path.join(dir, f), 'utf8')]);
+  // spacer.svg is a text-free layout helper, not an illustration
+  const out = fs.readdirSync(dir).filter(f => f.endsWith('.svg') && f !== 'spacer.svg').map(f => [f, fs.readFileSync(path.join(dir, f), 'utf8')]);
   fs.rmSync(dir, { recursive: true, force: true });
   const big = new Map(calendar); big.set('2026-10-10', 1234);
   for (const night of [false, true]) {

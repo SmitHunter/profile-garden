@@ -37,20 +37,31 @@ export function selectPackets(nodes, { overrides = {}, exclude = [], log = () =>
 const attr = s => esc(s).replace(/"/g, '&quot;');
 export const packetAlt = p => `${p.name ?? p.title} seed packet: ${p.line.replace(/[.\s]+$/, '')}.${p.tags.length ? ` ${p.tags.join(', ')}.` : ''}`;
 
-// The README section between the seed-packets markers: one centred row, ~3 packets per line.
+// An almost zero-height image. The copy of a packet row that is not meant for the current screen
+// size swaps itself for this, so it takes up no visible space.
+export const SPACER_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1" width="1000" height="1"></svg>\n';
+export const PHONE_MAX_WIDTH = 600;
+
+// The README section between the seed-packets markers: one centred block.
+// A README cannot reflow, so every packet is listed twice: three per line for wide screens
+// (31% each) and two larger per line for phones (48% each). Each copy hides itself with a
+// width-based <source> on the other screen size.
 // imagesDir: where the packet SVGs live in the profile repo.
 export function packetsHtml(packets, imagesDir = 'readme') {
   if (!packets.length) return '';
-  const items = packets.map(p => [
+  const row = (width, hiddenWhen) => packets.map(p => [
     `  <a href="${attr(p.url)}">`,
     `    <picture>`,
+    `      <source media="${hiddenWhen}" srcset="${imagesDir}/spacer.svg">`,
     `      <source media="(prefers-color-scheme: dark)" srcset="${imagesDir}/packet-${p.slug}-night.svg">`,
     `      <source media="(prefers-color-scheme: light)" srcset="${imagesDir}/packet-${p.slug}-day.svg">`,
-    `      <img alt="${attr(packetAlt(p))}" src="${imagesDir}/packet-${p.slug}-day.svg" width="31%">`,
+    `      <img alt="${attr(packetAlt(p))}" src="${imagesDir}/packet-${p.slug}-day.svg" width="${width}">`,
     `    </picture>`,
     `  </a>`,
   ].join('\n'));
-  return `<p align="center">\n${items.join('\n')}\n</p>`;
+  const wide = row('31%', `(max-width: ${PHONE_MAX_WIDTH}px)`);
+  const phone = row('48%', `(min-width: ${PHONE_MAX_WIDTH + 1}px)`);
+  return `<p align="center">\n${[...wide, ...phone].join('\n')}\n</p>`;
 }
 
 // Shown at ~31% of the README column (~260 CSS px), so 1 CSS px ~ 1.3 units here:

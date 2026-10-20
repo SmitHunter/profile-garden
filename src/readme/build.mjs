@@ -9,7 +9,7 @@ import { loadConfig, takeConfigArg } from '../config.mjs';
 import { fetchCalendar, fetchPinned } from '../github.mjs';
 import { renderBanner } from './banner.mjs';
 import { renderLegend } from './legend.mjs';
-import { renderPacket, selectPackets, packetsHtml } from './packets.mjs';
+import { renderPacket, selectPackets, packetsHtml, SPACER_SVG } from './packets.mjs';
 import { renderGrowing, growingStats } from './growing.mjs';
 import { renderStack } from './stack.mjs';
 import { renderFooter } from './footer.mjs';
@@ -48,6 +48,7 @@ export async function build({ config, outDir, fixture, pinnedFixture, token, now
     if (readme.stack.length) out.push([`stack-${t}.svg`, renderStack({ night, stack: readme.stack })]);
     out.push([`footer-${t}.svg`, renderFooter({ night, footer: readme.footer })]);
   }
+  if (packets.length) out.push(['spacer.svg', SPACER_SVG]);
   out.push(['packets.html', packetsHtml(packets, readme.imagesDir)]);
   fs.mkdirSync(outDir, { recursive: true });
   for (const [name, svg] of out) fs.writeFileSync(path.join(outDir, name), svg);
