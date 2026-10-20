@@ -104,7 +104,8 @@ Minimal config:
 2. **Render.** Pure functions turn the calendar into SVG. Decoration uses a seeded random generator, so the same data always gives the same bytes and only real changes get committed.
 3. **Animate with CSS only.** Plants grow in, things sway and fireflies blink with plain CSS keyframes inside the SVG: no scripts and no CSS variables, which GitHub's image proxy (camo) strips.
 4. **Render, then write.** Both images are rendered in memory before anything is written, and the profile repo is only checked out after every render succeeded. A failed API call or render leaves yesterday's garden in place.
-5. **Daily cron.** `0 18 * * *` (18:00 UTC). Change the `cron` line in `.github/workflows/garden.yml` to run shortly after midnight in your time zone.
+5. **Daily cron.** `23 14 * * *` (14:23 UTC, just after midnight in Melbourne). Change the `cron` line in `.github/workflows/garden.yml` to run shortly after midnight in your time zone, and keep the minute off `0`: GitHub delays or drops runs queued exactly on the hour.
+6. **Seed packets on phones.** A README cannot reflow, so each packet is listed twice: three across for wide screens and two larger per line for screens up to 600px wide. The copy meant for the other size swaps itself for `spacer.svg`, an image about one pixel tall. The trade-off is a little blank space where the hidden copy sits.
 
 ## Local development
 

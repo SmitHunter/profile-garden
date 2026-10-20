@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { selectPackets, packetsHtml, renderPacket, artFor } from '../src/readme/packets.mjs';
+import { selectPackets, packetsHtml, renderPacket, artFor, SPACER_SVG } from '../src/readme/packets.mjs';
 import { splice, stalePackets, START, END } from '../src/readme/splice.mjs';
 
 const repo = (name, extra = {}) => ({ name, description: `${name} does things`, url: `https://github.com/octocat/${name}`, isPrivate: false, isFork: false, languages: { nodes: [{ name: 'Python' }] }, ...extra });
@@ -68,10 +68,28 @@ test('every art variant renders day and night with the packet number', () => {
   assert.ok(!renderPacket(bare, { night: false }).includes('NaN'));
 });
 
+test('packets.html lists each packet twice: 31% for wide screens, 48% for phones, each hiding on the other', () => {
+  const html = packetsHtml(selectPackets([repo('todo-api'), repo('x')], { overrides: OVERRIDES }));
+  assert.equal((html.match(/width="31%"/g) || []).length, 2);
+  assert.equal((html.match(/width="48%"/g) || []).length, 2);
+  // the wide row swaps to the spacer on phones, the phone row swaps to it on wide screens
+  const [wide, phone] = [html.slice(0, html.indexOf('width="48%"')), html.slice(html.indexOf('width="31%"') + 1)];
+  assert.ok(wide.includes('media="(max-width: 600px)" srcset="readme/spacer.svg"'));
+  assert.ok(phone.includes('media="(min-width: 601px)" srcset="readme/spacer.svg"'));
+  assert.equal((html.match(/srcset="readme\/spacer\.svg"/g) || []).length, 4);
+  // the spacer must come first so it wins over the colour-scheme sources
+  for (const block of html.split('<picture>').slice(1)) assert.ok(block.indexOf('spacer.svg') < block.indexOf('prefers-color-scheme'));
+});
+
+test('spacer.svg is a sliver: wide enough to hold a place, about zero tall', () => {
+  assert.match(SPACER_SVG, /viewBox="0 0 1000 1"/);
+  assert.ok(!/<(path|rect|circle|text|image)\b/.test(SPACER_SVG), 'draws nothing');
+});
+
 test('packets.html links each packet with day/night sources, escaped alt and 31% width', () => {
   const html = packetsHtml(selectPackets([repo('todo-api'), repo('x', { description: 'Say "hi" & <go>' })], { overrides: OVERRIDES }));
   assert.ok(html.startsWith('<p align="center">') && html.endsWith('</p>'));
-  assert.equal((html.match(/<a href=/g) || []).length, 2);
+  assert.equal((html.match(/<a href=/g) || []).length, 4);
   assert.ok(html.includes('<a href="https://github.com/octocat/todo-api">'));
   assert.ok(html.includes('srcset="readme/packet-todo-api-night.svg"') && html.includes('srcset="readme/packet-todo-api-day.svg"'));
   assert.ok(html.includes('alt="todo-api seed packet: Todo lists over plain HTTP. TypeScript, Express, Postgres."'));

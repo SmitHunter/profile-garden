@@ -28,7 +28,8 @@ test('build writes day/night pairs that obey the garden constraints', async () =
   const { files, packets } = await build({ outDir: dir, fixture: 'tests/fixtures/calendar-2026-10-17.json', pinnedFixture: 'tests/fixtures/pinned.json' });
   // the profile repo, private repos and readme.packets.exclude are skipped
   assert.deepEqual(packets, ['weather-bot', 'todo-api', 'pixel-pets']);
-  const svgs = files.filter(([n]) => n.endsWith('.svg'));
+  assert.ok(files.some(([n]) => n === 'spacer.svg'), 'phone layout needs the spacer image');
+  const svgs = files.filter(([n]) => n.endsWith('.svg') && n !== 'spacer.svg');
   assert.equal(svgs.length % 2, 0);
   assert.equal(svgs.filter(([n]) => n.startsWith('packet-')).length, packets.length * 2);
   const html = fs.readFileSync(path.join(dir, 'packets.html'), 'utf8');
@@ -57,7 +58,7 @@ test('build without token or fixture rejects and writes nothing', async () => {
 test('build with no pinned repos writes no packets and an empty packets.html', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'readme-'));
   const { files } = await build({ outDir: dir, fixture: 'tests/fixtures/calendar-2026-10-17.json' });
-  assert.ok(!files.some(([n]) => n.startsWith('packet-')));
+  assert.ok(!files.some(([n]) => n.startsWith('packet-') || n === 'spacer.svg'));
   assert.equal(fs.readFileSync(path.join(dir, 'packets.html'), 'utf8'), '');
   fs.rmSync(dir, { recursive: true, force: true });
 });

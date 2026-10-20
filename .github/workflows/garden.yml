@@ -10,7 +10,9 @@ name: garden
 
 on:
   schedule:
-    - cron: "0 18 * * *" # once a day; GitHub may start it a little late
+    # Once a day at 14:23 UTC, just after midnight in Melbourne. Not on the hour:
+    # GitHub delays or drops runs queued for minute 0, when load peaks.
+    - cron: "23 14 * * *"
   workflow_dispatch:
 
 permissions:
